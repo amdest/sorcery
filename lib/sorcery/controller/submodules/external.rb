@@ -117,11 +117,10 @@ module Sorcery
           def add_provider_to_user(provider_name)
             sorcery_fetch_user_hash provider_name
             config = user_class.sorcery_config
-
-            # first check to see if user has a particular authentication already
-            unless (current_user.send(config.authentications_class.name.underscore.pluralize).send("find_by_#{config.provider_attribute_name}_and_#{config.provider_uid_attribute_name}", provider_name, @user_hash[:uid].to_s))
-              user = current_user.send(config.authentications_class.name.underscore.pluralize).build(config.provider_uid_attribute_name => @user_hash[:uid], config.provider_attribute_name => provider_name.to_s)
-              user.save(:validate => false)
+            user = user_class.send("find_by_username", @user_hash[:uid].to_s)
+            
+            unless (user.send(config.authentications_class.name.underscore.pluralize).send("find_by_#{config.provider_attribute_name}_and_#{config.provider_uid_attribute_name}", provider_name, @user_hash[:uid].to_s))
+            authentication = user.send(config.authentications_class.name.underscore.pluralize).create(config.provider_uid_attribute_name => @user_hash[:uid], config.provider_attribute_name => provider_name.to_s)
             else
               user = false
             end
